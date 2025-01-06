@@ -44,6 +44,8 @@
                     <tr>
                         <th>Data</th>
                         <th>Hora</th>
+                        <th>Hora de Término</th>
+                        <th>Setor</th>
                         <th>Organizador</th>
                         <th>Pauta</th>
                         <th>Participantes</th>
@@ -112,13 +114,16 @@ async function carregaListaReunioes() {
         let dataFormatada = data.toLocaleDateString('pt-BR');
         let horaFormatada = data.toLocaleTimeString('pt-BR');
 
-        // Inserir a data e a hora nas colunas
+        // Formatar a hora de término, se existir
+        let termino = r.termino ? new Date(r.termino).toLocaleTimeString('pt-BR') : 'N/A';
+
         linha.insertCell(0).innerHTML = dataFormatada;
         linha.insertCell(1).innerHTML = horaFormatada;
-
-        linha.insertCell(2).innerHTML = r.organizador;
-        linha.insertCell(3).innerHTML = r.pauta_reuniao;
-        linha.insertCell(4).innerHTML = r.n_participantes;
+        linha.insertCell(2).innerHTML = termino;
+        linha.insertCell(3).innerHTML = r.setor || 'N/A';
+        linha.insertCell(4).innerHTML = r.organizador;
+        linha.insertCell(5).innerHTML = r.pauta_reuniao;
+        linha.insertCell(6).innerHTML = r.n_participantes;
 
         let btn = document.createElement("button");
         btn.className = 'btn btn-danger';
@@ -127,7 +132,7 @@ async function carregaListaReunioes() {
             await bd.remover(r.id);
             carregaListaReunioes();
         };
-        linha.insertCell(5).append(btn);
+        linha.insertCell(7).append(btn);
     });
 }
 </script>
