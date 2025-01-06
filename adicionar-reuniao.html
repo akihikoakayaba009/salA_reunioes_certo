@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Adicionar Reunião</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -53,8 +54,8 @@
                     <input type="text" class="form-control" id="organizador" placeholder="Nome do Organizador" required>
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" placeholder="Email do Organizador" required>
+                    <label for="setor">Setor</label>
+                    <input type="text" class="form-control" id="setor" placeholder="Setor do Organizador" required>
                 </div>
             </div>
             
@@ -62,6 +63,10 @@
                 <div class="form-group col-md-6">
                     <label for="data">Data e Hora</label>
                     <input type="datetime-local" class="form-control" id="data" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="hora_termino">Hora de Término</label>
+                    <input type="time" class="form-control" id="hora_termino" required>
                 </div>
             </div>
 
@@ -111,12 +116,13 @@ document.getElementById('formAdicionarReuniao').addEventListener('submit', async
     event.preventDefault();  // Evita o envio do formulário e recarregamento da página.
 
     let organizador = document.getElementById('organizador').value;
-    let email = document.getElementById('email').value;
+    let setor = document.getElementById('setor').value;
     let data = new Date(document.getElementById('data').value).toISOString(); // Convertendo para formato ISO
+    let hora_termino = document.getElementById('hora_termino').value;
     let pauta_reuniao = document.getElementById('pauta_reuniao').value;
     let n_participantes = document.getElementById('n_participantes').value;
 
-    let reuniao = { organizador, email, data, pauta_reuniao, n_participantes, final: false };
+    let reuniao = { organizador, setor, data, hora_termino, pauta_reuniao, n_participantes, final: false };
 
     await bd.gravar(reuniao);
     alert('Reunião adicionada com sucesso!');
