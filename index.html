@@ -2,12 +2,24 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lista de Reuniões</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+    <style>
+        .table-responsive {
+            overflow-x: auto;
+        }
+        th, td {
+            white-space: nowrap;
+        }
+        .btn {
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 
 <body onload="carregaListaReunioes()">
@@ -15,9 +27,12 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-5">
     <div class="container">
         <a class="navbar-brand" href="#">Reuniões</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
                     <a class="nav-link" href="adicionar-reuniao.html">Adicionar</a>
                 </li>
                 <li class="nav-item">
@@ -29,32 +44,30 @@
 </nav>
 
 <div class="container">
-    <h1 class="display-4">Lista de Reuniões</h1>
-    
+    <h1 class="display-4 text-center">Lista de Reuniões</h1>
+
     <!-- Filtro de Data -->
     <div class="form-group">
         <label for="filtroData">Filtrar por Data:</label>
         <input type="date" class="form-control" id="filtroData" onchange="carregaListaReunioes()">
     </div>
 
-    <div class="row">
-        <div class="col">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Hora</th>
-                        <th>Hora de Término</th>
-                        <th>Setor</th>
-                        <th>Organizador</th>
-                        <th>Pauta</th>
-                        <th>Participantes</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="listaReunioes"></tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Data</th>
+                    <th>Hora</th>
+                    <th>Hora de Término</th>
+                    <th>Setor</th>
+                    <th>Organizador</th>
+                    <th>Pauta</th>
+                    <th>Participantes</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="listaReunioes"></tbody>
+        </table>
     </div>
 </div>
 
@@ -93,28 +106,22 @@ async function carregaListaReunioes() {
     let reunioes = await bd.recuperarTodosRegistros();
     let listaReunioes = document.getElementById('listaReunioes');
     listaReunioes.innerHTML = '';
-    
-    // Obter a data do filtro
+
     let filtroData = document.getElementById('filtroData').value;
-    
-    // Se uma data for selecionada, formatá-la para comparação
     let filtroDataFormatada = filtroData ? new Date(filtroData).toISOString().split('T')[0] : null;
 
-    // Filtrar reuniões pela data
     reunioes = reunioes.filter(function(r) {
-        let dataReuniao = new Date(r.data).toISOString().split('T')[0]; // Formatando a data para 'YYYY-MM-DD'
+        let dataReuniao = new Date(r.data).toISOString().split('T')[0];
         return !filtroData || dataReuniao === filtroDataFormatada;
     });
 
     reunioes.forEach(function(r) {
         let linha = listaReunioes.insertRow();
-        
-        // Formatar a data e hora separadas
+
         let data = new Date(r.data);
         let dataFormatada = data.toLocaleDateString('pt-BR');
         let horaFormatada = data.toLocaleTimeString('pt-BR');
 
-        // Formatar a hora de término, se existir
         let termino = r.hora_termino ? r.hora_termino : 'N/A';
 
         linha.insertCell(0).innerHTML = dataFormatada;
@@ -126,7 +133,7 @@ async function carregaListaReunioes() {
         linha.insertCell(6).innerHTML = r.n_participantes;
 
         let btn = document.createElement("button");
-        btn.className = 'btn btn-danger';
+        btn.className = 'btn btn-danger btn-sm';
         btn.innerHTML = '<i class="fas fa-times"></i>';
         btn.onclick = async function() {
             await bd.remover(r.id);
