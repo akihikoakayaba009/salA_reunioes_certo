@@ -115,9 +115,7 @@ async function carregaListaReunioes() {
         let horaFormatada = data.toLocaleTimeString('pt-BR');
 
         // Formatar a hora de término, se existir
-       // Formatar a hora de término, se existir
-let termino = r.hora_termino ? r.hora_termino : 'N/A';
-
+        let termino = r.hora_termino ? r.hora_termino : 'N/A';
 
         linha.insertCell(0).innerHTML = dataFormatada;
         linha.insertCell(1).innerHTML = horaFormatada;
