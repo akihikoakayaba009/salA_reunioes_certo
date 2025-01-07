@@ -3,28 +3,53 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lista de Reuniões</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <title>Adicionar Reunião</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+    <style>
+        body {
+            background-color: #eef2f3;
+        }
+        .form-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            margin: auto;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+        }
+        .btn-custom {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .is-invalid {
+            border-color: #dc3545;
+        }
+        .invalid-feedback {
+            display: none;
+            color: #dc3545;
+        }
+        .is-invalid + .invalid-feedback {
+            display: block;
+        }
+    </style>
 </head>
-
-<body onload="carregaListaReunioes()">
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark mb-5">
     <div class="container">
         <a class="navbar-brand" href="#">Reuniões</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="adicionar-reuniao.html">Adicionar</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="index.html">Lista</a>
                 </li>
             </ul>
@@ -33,31 +58,53 @@
 </nav>
 
 <div class="container">
-    <h1 class="h3 text-center mb-4">Lista de Reuniões</h1>
+    <h1 class="display-4 text-center mb-5">Adicionar Reunião</h1>
+    
+    <div class="form-container">
+        <form id="formAdicionarReuniao">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="organizador">Organizador</label>
+                    <input type="text" class="form-control" id="organizador" placeholder="Nome do Organizador" required>
+                    <div class="invalid-feedback">Por favor, preencha o campo Organizador.</div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="setor">Setor</label>
+                    <input type="text" class="form-control" id="setor" placeholder="Setor do Organizador" required>
+                    <div class="invalid-feedback">Por favor, preencha o campo Setor.</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="data">Data e Hora</label>
+                    <input type="datetime-local" class="form-control" id="data" required>
+                    <div class="invalid-feedback">Por favor, selecione uma data e hora válidas.</div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="hora_termino">Hora de Término</label>
+                    <input type="time" class="form-control" id="hora_termino" required>
+                    <div class="invalid-feedback">Por favor, preencha a hora de término.</div>
+                </div>
+            </div>
 
-    <!-- Filtro de Data -->
-    <div class="form-group">
-        <label for="filtroData">Filtrar por Data:</label>
-        <input type="date" class="form-control" id="filtroData" onchange="carregaListaReunioes()">
-    </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="pauta_reuniao">Pauta da Reunião</label>
+                    <input type="text" class="form-control" id="pauta_reuniao" placeholder="Tema principal da reunião" required>
+                    <div class="invalid-feedback">Por favor, preencha a pauta da reunião.</div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="n_participantes">Número de Participantes</label>
+                    <input type="number" class="form-control" id="n_participantes" placeholder="Ex: 10" required>
+                    <div class="invalid-feedback">Por favor, informe o número de participantes.</div>
+                </div>
+            </div>
 
-    <!-- Tabela Responsiva -->
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Data</th>
-                    <th>Hora</th>
-                    <th>Término</th>
-                    <th>Setor</th>
-                    <th>Organizador</th>
-                    <th>Pauta</th>
-                    <th>Participantes</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="listaReunioes"></tbody>
-        </table>
+            <button type="submit" class="btn btn-primary btn-custom" id="submitButton">
+                <i class="fas fa-plus"></i> Adicionar Reunião
+            </button>
+        </form>
     </div>
 </div>
 
@@ -67,23 +114,16 @@ class Bd {
         this.endpoint = 'https://677c1ef820824100c07bf67b.mockapi.io/REUNIAO/REUNIAO';
     }
 
-    async recuperarTodosRegistros() {
+    async gravar(d) {
         try {
-            const response = await fetch(this.endpoint);
-            if (!response.ok) throw new Error('Erro ao recuperar reuniões');
-            return await response.json();
-        } catch (error) {
-            console.error('Error:', error);
-            return [];
-        }
-    }
-
-    async remover(id) {
-        try {
-            const response = await fetch(`${this.endpoint}/${id}`, {
-                method: 'DELETE',
+            const response = await fetch(this.endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(d),
             });
-            if (!response.ok) throw new Error('Erro ao deletar reunião');
+            if (!response.ok) throw new Error('Erro ao cadastrar reunião');
         } catch (error) {
             console.error('Error:', error);
         }
@@ -92,45 +132,47 @@ class Bd {
 
 let bd = new Bd();
 
-async function carregaListaReunioes() {
-    let reunioes = await bd.recuperarTodosRegistros();
-    let listaReunioes = document.getElementById('listaReunioes');
-    listaReunioes.innerHTML = '';
-    
-    let filtroData = document.getElementById('filtroData').value;
-    let filtroDataFormatada = filtroData ? new Date(filtroData).toISOString().split('T')[0] : null;
+document.getElementById('formAdicionarReuniao').addEventListener('submit', async function(event) {
+    event.preventDefault();
 
-    reunioes = reunioes.filter(function(r) {
-        let dataReuniao = new Date(r.data).toISOString().split('T')[0];
-        return !filtroData || dataReuniao === filtroDataFormatada;
+    const submitButton = document.getElementById('submitButton');
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adicionando...';
+
+    const fields = ['organizador', 'setor', 'data', 'hora_termino', 'pauta_reuniao', 'n_participantes'];
+    let isValid = true;
+
+    fields.forEach(id => {
+        const input = document.getElementById(id);
+        if (!input.value.trim()) {
+            input.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            input.classList.remove('is-invalid');
+        }
     });
 
-    reunioes.forEach(function(r) {
-        let linha = listaReunioes.insertRow();
-        
-        let data = new Date(r.data);
-        let dataFormatada = data.toLocaleDateString('pt-BR');
-        let horaFormatada = data.toLocaleTimeString('pt-BR');
-        let termino = r.hora_termino ? r.hora_termino : 'N/A';
+    if (!isValid) {
+        alert('Por favor, preencha todos os campos obrigatórios!');
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-plus"></i> Adicionar Reunião';
+        return;
+    }
 
-        linha.insertCell(0).innerHTML = dataFormatada;
-        linha.insertCell(1).innerHTML = horaFormatada;
-        linha.insertCell(2).innerHTML = termino;
-        linha.insertCell(3).innerHTML = r.setor || 'N/A';
-        linha.insertCell(4).innerHTML = r.organizador;
-        linha.insertCell(5).innerHTML = r.pauta_reuniao;
-        linha.insertCell(6).innerHTML = r.n_participantes;
+    const reuniao = {
+        organizador: document.getElementById('organizador').value,
+        setor: document.getElementById('setor').value,
+        data: new Date(document.getElementById('data').value).toISOString(),
+        hora_termino: document.getElementById('hora_termino').value,
+        pauta_reuniao: document.getElementById('pauta_reuniao').value,
+        n_participantes: document.getElementById('n_participantes').value,
+        final: false,
+    };
 
-        let btn = document.createElement("button");
-        btn.className = 'btn btn-danger btn-sm';
-        btn.innerHTML = '<i class="fas fa-trash"></i>';
-        btn.onclick = async function() {
-            await bd.remover(r.id);
-            carregaListaReunioes();
-        };
-        linha.insertCell(7).append(btn);
-    });
-}
+    await bd.gravar(reuniao);
+    alert('Reunião adicionada com sucesso!');
+    window.location.href = 'https://sal-a-reunioes-certo-r4v4bh1xs.vercel.app/';
+});
 </script>
 </body>
 </html>
