@@ -4,61 +4,75 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lista de Reuniões</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .card {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            text-align: center;
+        }
+        .card-body {
+            padding: 10px;
+            font-size: 14px;
+            overflow-y: auto;
+        }
+        .card-footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f1f1f1;
+        }
+        .btn-action {
+            font-size: 12px;
+            margin: 5px;
+        }
+    </style>
 </head>
-
-<body onload="carregaListaReunioes()">
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
         <a class="navbar-brand" href="#">Reuniões</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="collapse navbar-collapse" id="navbarMenu">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="adicionar-reuniao.html">Adicionar</a>
+                    <a class="nav-link" href="adicionar-reuniao.html">Adicionar Reunião</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="index.html">Lista</a>
+                    <a class="nav-link" href="lista-reunioes.html">Lista de Reuniões</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container">
-    <h1 class="h3 text-center mb-4">Lista de Reuniões</h1>
-
-    <!-- Filtro de Data -->
-    <div class="form-group">
-        <label for="filtroData">Filtrar por Data:</label>
-        <input type="date" class="form-control" id="filtroData" onchange="carregaListaReunioes()">
-    </div>
-
-    <!-- Tabela Responsiva -->
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Data</th>
-                    <th>Hora</th>
-                    <th>Término</th>
-                    <th>Setor</th>
-                    <th>Organizador</th>
-                    <th>Pauta</th>
-                    <th>Participantes</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="listaReunioes"></tbody>
-        </table>
-    </div>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Reuniões Agendadas</h2>
+    <div class="card-container" id="listaReunioes"></div>
 </div>
 
 <script>
@@ -67,23 +81,21 @@ class Bd {
         this.endpoint = 'https://677c1ef820824100c07bf67b.mockapi.io/REUNIAO/REUNIAO';
     }
 
-    async recuperarTodosRegistros() {
+    async listar() {
         try {
             const response = await fetch(this.endpoint);
-            if (!response.ok) throw new Error('Erro ao recuperar reuniões');
-            return await response.json();
+            if (!response.ok) throw new Error('Erro ao buscar reuniões');
+            return response.json();
         } catch (error) {
             console.error('Error:', error);
             return [];
         }
     }
 
-    async remover(id) {
+    async excluir(id) {
         try {
-            const response = await fetch(`${this.endpoint}/${id}`, {
-                method: 'DELETE',
-            });
-            if (!response.ok) throw new Error('Erro ao deletar reunião');
+            const response = await fetch(`${this.endpoint}/${id}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Erro ao excluir reunião');
         } catch (error) {
             console.error('Error:', error);
         }
@@ -92,45 +104,57 @@ class Bd {
 
 let bd = new Bd();
 
-async function carregaListaReunioes() {
-    let reunioes = await bd.recuperarTodosRegistros();
-    let listaReunioes = document.getElementById('listaReunioes');
+async function carregarReunioes() {
+    const listaReunioes = document.getElementById('listaReunioes');
+    listaReunioes.innerHTML = '<p>Carregando...</p>';
+
+    const reunioes = await bd.listar();
     listaReunioes.innerHTML = '';
-    
-    let filtroData = document.getElementById('filtroData').value;
-    let filtroDataFormatada = filtroData ? new Date(filtroData).toISOString().split('T')[0] : null;
 
-    reunioes = reunioes.filter(function(r) {
-        let dataReuniao = new Date(r.data).toISOString().split('T')[0];
-        return !filtroData || dataReuniao === filtroDataFormatada;
-    });
+    if (reunioes.length === 0) {
+        listaReunioes.innerHTML = '<p class="text-center">Nenhuma reunião encontrada.</p>';
+        return;
+    }
 
-    reunioes.forEach(function(r) {
-        let linha = listaReunioes.insertRow();
-        
-        let data = new Date(r.data);
-        let dataFormatada = data.toLocaleDateString('pt-BR');
-        let horaFormatada = data.toLocaleTimeString('pt-BR');
-        let termino = r.hora_termino ? r.hora_termino : 'N/A';
-
-        linha.insertCell(0).innerHTML = dataFormatada;
-        linha.insertCell(1).innerHTML = horaFormatada;
-        linha.insertCell(2).innerHTML = termino;
-        linha.insertCell(3).innerHTML = r.setor || 'N/A';
-        linha.insertCell(4).innerHTML = r.organizador;
-        linha.insertCell(5).innerHTML = r.pauta_reuniao;
-        linha.insertCell(6).innerHTML = r.n_participantes;
-
-        let btn = document.createElement("button");
-        btn.className = 'btn btn-danger btn-sm';
-        btn.innerHTML = '<i class="fas fa-trash"></i>';
-        btn.onclick = async function() {
-            await bd.remover(r.id);
-            carregaListaReunioes();
-        };
-        linha.insertCell(7).append(btn);
+    reunioes.forEach((reuniao) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div class="card-header">${reuniao.pauta_reuniao}</div>
+            <div class="card-body">
+                <p><strong>Organizador:</strong> ${reuniao.organizador}</p>
+                <p><strong>Setor:</strong> ${reuniao.setor}</p>
+                <p><strong>Data:</strong> ${new Date(reuniao.data).toLocaleString()}</p>
+                <p><strong>Hora de Término:</strong> ${reuniao.hora_termino}</p>
+                <p><strong>Número de Participantes:</strong> ${reuniao.n_participantes}</p>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary btn-action" onclick="editarReuniao(${reuniao.id})">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn btn-danger btn-action" onclick="excluirReuniao(${reuniao.id})">
+                    <i class="fas fa-trash"></i> Excluir
+                </button>
+            </div>
+        `;
+        listaReunioes.appendChild(card);
     });
 }
+
+async function excluirReuniao(id) {
+    if (confirm('Deseja realmente excluir esta reunião?')) {
+        await bd.excluir(id);
+        alert('Reunião excluída com sucesso!');
+        carregarReunioes();
+    }
+}
+
+function editarReuniao(id) {
+    window.location.href = `editar-reuniao.html?id=${id}`;
+}
+
+// Inicializa a lista de reuniões ao carregar a página
+carregarReunioes();
 </script>
 </body>
 </html>
