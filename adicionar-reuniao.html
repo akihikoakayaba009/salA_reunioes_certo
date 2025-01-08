@@ -108,12 +108,23 @@ class Bd {
             console.error('Error:', error);
         }
     }
+
+    async listar() {
+        try {
+            const response = await fetch(this.endpoint);
+            if (!response.ok) throw new Error('Erro ao buscar reuniões');
+            return await response.json();
+        } catch (error) {
+            console.error('Error:', error);
+            return [];
+        }
+    }
 }
 
 let bd = new Bd();
 
 document.getElementById('formAdicionarReuniao').addEventListener('submit', async function(event) {
-    event.preventDefault();  // Evita o envio do formulário e recarregamento da página.
+    event.preventDefault(); // Evita o envio do formulário e recarregamento da página.
 
     let organizador = document.getElementById('organizador').value;
     let setor = document.getElementById('setor').value;
@@ -124,9 +135,34 @@ document.getElementById('formAdicionarReuniao').addEventListener('submit', async
 
     let reuniao = { organizador, setor, data, hora_termino, pauta_reuniao, n_participantes, final: false };
 
+    // Verifica se já existe uma reunião no mesmo horário
+    const reunioes = await bd.listar();
+    const conflito = reunioes.some(r => {
+        const inicioExistente = new Date(r.data).getTime();
+        const terminoExistente = new Date(inicioExistente);
+        terminoExistente.setHours(parseInt(r.hora_termino.split(":")[0]));
+        terminoExistente.setMinutes(parseInt(r.hora_termino.split(":")[1]));
+
+        const inicioNova = new Date(reuniao.data).getTime();
+        const terminoNova = new Date(inicioNova);
+        terminoNova.setHours(parseInt(reuniao.hora_termino.split(":")[0]));
+        terminoNova.setMinutes(parseInt(reuniao.hora_termino.split(":")[1]));
+
+        return (
+            (inicioNova >= inicioExistente && inicioNova < terminoExistente) || // Conflito no início
+            (terminoNova > inicioExistente && terminoNova <= terminoExistente) || // Conflito no fim
+            (inicioNova <= inicioExistente && terminoNova >= terminoExistente) // Envolve o intervalo todo
+        );
+    });
+
+    if (conflito) {
+        alert('Já existe uma reunião marcada para o horário selecionado. Por favor, escolha outro horário.');
+        return;
+    }
+
     await bd.gravar(reuniao);
     alert('Reunião adicionada com sucesso!');
-    window.location.href = 'https://sal-a-reunioes-certo-r4v4bh1xs.vercel.app/';
+    window.location.href = 'index.html';
 });
 </script>
 
