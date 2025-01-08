@@ -8,25 +8,29 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
+        /* Estilo para os cards (mobile) */
         .card-container {
-            display: flex;
+            display: none;
             flex-wrap: wrap;
             gap: 20px;
             justify-content: center;
         }
+
         .card {
             width: 100%;
             max-width: 300px;
-            height: 300px;
+            height: auto;
             margin-bottom: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             transition: transform 0.3s ease;
         }
+
         .card:hover {
             transform: scale(1.05);
         }
+
         .card-header {
             background-color: #007bff;
             color: white;
@@ -34,19 +38,27 @@
             padding: 10px;
             text-align: center;
         }
+
         .card-body {
             padding: 10px;
             font-size: 14px;
             overflow-y: auto;
         }
-        .card-footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #f1f1f1;
+
+        /* Estilo para tabela (desktop) */
+        .table-container {
+            display: table;
+            width: 100%;
         }
-        .btn-action {
-            font-size: 12px;
-            margin: 5px;
+
+        @media (max-width: 768px) {
+            .table-container {
+                display: none;
+            }
+
+            .card-container {
+                display: flex;
+            }
         }
     </style>
 </head>
@@ -72,6 +84,34 @@
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">Reuniões Agendadas</h2>
+
+    <!-- Filtro por data -->
+    <div class="form-group">
+        <label for="filterDate">Filtrar por Data:</label>
+        <input type="date" id="filterDate" class="form-control">
+    </div>
+
+    <!-- Tabela para desktop -->
+    <div class="table-container">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Pauta</th>
+                    <th>Organizador</th>
+                    <th>Setor</th>
+                    <th>Data</th>
+                    <th>Hora de Término</th>
+                    <th>Participantes</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaReunioes">
+                <!-- Dados dinâmicos -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Cards para mobile -->
     <div class="card-container" id="listaReunioes"></div>
 </div>
 
@@ -105,18 +145,44 @@ class Bd {
 let bd = new Bd();
 
 async function carregarReunioes() {
+    const filterDate = document.getElementById('filterDate').value;
     const listaReunioes = document.getElementById('listaReunioes');
+    const tabelaReunioes = document.getElementById('tabelaReunioes');
+
     listaReunioes.innerHTML = '<p>Carregando...</p>';
+    tabelaReunioes.innerHTML = '';
 
     const reunioes = await bd.listar();
     listaReunioes.innerHTML = '';
 
-    if (reunioes.length === 0) {
+    const reunioesFiltradas = filterDate
+        ? reunioes.filter(r => new Date(r.data).toISOString().split('T')[0] === filterDate)
+        : reunioes;
+
+    if (reunioesFiltradas.length === 0) {
         listaReunioes.innerHTML = '<p class="text-center">Nenhuma reunião encontrada.</p>';
+        tabelaReunioes.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma reunião encontrada.</td></tr>';
         return;
     }
 
-    reunioes.forEach((reuniao) => {
+    reunioesFiltradas.forEach((reuniao) => {
+        // Adicionar à tabela
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${reuniao.pauta_reuniao}</td>
+            <td>${reuniao.organizador}</td>
+            <td>${reuniao.setor}</td>
+            <td>${new Date(reuniao.data).toLocaleString()}</td>
+            <td>${reuniao.hora_termino}</td>
+            <td>${reuniao.n_participantes}</td>
+            <td>
+                <button class="btn btn-primary btn-sm" onclick="editarReuniao(${reuniao.id})">Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="excluirReuniao(${reuniao.id})">Excluir</button>
+            </td>
+        `;
+        tabelaReunioes.appendChild(row);
+
+        // Adicionar aos cards
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
@@ -126,15 +192,11 @@ async function carregarReunioes() {
                 <p><strong>Setor:</strong> ${reuniao.setor}</p>
                 <p><strong>Data:</strong> ${new Date(reuniao.data).toLocaleString()}</p>
                 <p><strong>Hora de Término:</strong> ${reuniao.hora_termino}</p>
-                <p><strong>Número de Participantes:</strong> ${reuniao.n_participantes}</p>
+                <p><strong>Participantes:</strong> ${reuniao.n_participantes}</p>
             </div>
             <div class="card-footer">
-                <button class="btn btn-primary btn-action" onclick="editarReuniao(${reuniao.id})">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
-                <button class="btn btn-danger btn-action" onclick="excluirReuniao(${reuniao.id})">
-                    <i class="fas fa-trash"></i> Excluir
-                </button>
+           
+                <button class="btn btn-danger btn-sm" onclick="excluirReuniao(${reuniao.id})">Excluir</button>
             </div>
         `;
         listaReunioes.appendChild(card);
@@ -152,6 +214,9 @@ async function excluirReuniao(id) {
 function editarReuniao(id) {
     window.location.href = `editar-reuniao.html?id=${id}`;
 }
+
+// Filtrar ao alterar a data
+document.getElementById('filterDate').addEventListener('change', carregarReunioes);
 
 // Inicializa a lista de reuniões ao carregar a página
 carregarReunioes();
