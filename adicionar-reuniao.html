@@ -3,89 +3,76 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Adicionar Reunião</title>
+    <title>Lista de Reuniões</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
     <style>
-        .form-container {
-            background-color: #f9f9f9;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
         }
-        .navbar {
-            margin-bottom: 40px;
-        }
-        .btn-custom {
+        .card {
             width: 100%;
-            margin-top: 10px;
+            max-width: 300px;
+            height: 300px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            text-align: center;
+        }
+        .card-body {
+            padding: 10px;
+            font-size: 14px;
+            overflow-y: auto;
+        }
+        .card-footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f1f1f1;
+        }
+        .btn-action {
+            font-size: 12px;
+            margin: 5px;
         }
     </style>
 </head>
 <body>
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-5">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
         <a class="navbar-brand" href="#">Reuniões</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="adicionar-reuniao.html">Adicionar</a>
+                    <a class="nav-link" href="adicionar-reuniao.html">Adicionar Reunião</a>
                 </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="index.html">Lista</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="lista-reunioes.html">Lista de Reuniões</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container">
-    <h1 class="display-4 text-center mb-5">Adicionar Reunião</h1>
-    
-    <div class="form-container">
-        <form id="formAdicionarReuniao">
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="organizador">Organizador</label>
-                    <input type="text" class="form-control" id="organizador" placeholder="Nome do Organizador" required>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="setor">Setor</label>
-                    <input type="text" class="form-control" id="setor" placeholder="Setor do Organizador" required>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="data">Data e Hora</label>
-                    <input type="datetime-local" class="form-control" id="data" required>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="hora_termino">Hora de Término</label>
-                    <input type="time" class="form-control" id="hora_termino" required>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="pauta_reuniao">Pauta da Reunião</label>
-                    <input type="text" class="form-control" id="pauta_reuniao" placeholder="Tema principal da reunião" required>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="n_participantes">Número de Participantes</label>
-                    <input type="number" class="form-control" id="n_participantes" placeholder="Ex: 10" required>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-custom">
-                <i class="fas fa-plus"></i> Adicionar Reunião
-            </button>
-        </form>
-    </div>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Reuniões Agendadas</h2>
+    <div class="card-container" id="listaReunioes"></div>
 </div>
 
 <script>
@@ -94,16 +81,21 @@ class Bd {
         this.endpoint = 'https://677c1ef820824100c07bf67b.mockapi.io/REUNIAO/REUNIAO';
     }
 
-    async gravar(d) {
+    async listar() {
         try {
-            const response = await fetch(this.endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(d),
-            });
-            if (!response.ok) throw new Error('Erro ao cadastrar reunião');
+            const response = await fetch(this.endpoint);
+            if (!response.ok) throw new Error('Erro ao buscar reuniões');
+            return response.json();
+        } catch (error) {
+            console.error('Error:', error);
+            return [];
+        }
+    }
+
+    async excluir(id) {
+        try {
+            const response = await fetch(`${this.endpoint}/${id}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Erro ao excluir reunião');
         } catch (error) {
             console.error('Error:', error);
         }
@@ -112,23 +104,57 @@ class Bd {
 
 let bd = new Bd();
 
-document.getElementById('formAdicionarReuniao').addEventListener('submit', async function(event) {
-    event.preventDefault();  // Evita o envio do formulário e recarregamento da página.
+async function carregarReunioes() {
+    const listaReunioes = document.getElementById('listaReunioes');
+    listaReunioes.innerHTML = '<p>Carregando...</p>';
 
-    let organizador = document.getElementById('organizador').value;
-    let setor = document.getElementById('setor').value;
-    let data = new Date(document.getElementById('data').value).toISOString(); // Convertendo para formato ISO
-    let hora_termino = document.getElementById('hora_termino').value;
-    let pauta_reuniao = document.getElementById('pauta_reuniao').value;
-    let n_participantes = document.getElementById('n_participantes').value;
+    const reunioes = await bd.listar();
+    listaReunioes.innerHTML = '';
 
-    let reuniao = { organizador, setor, data, hora_termino, pauta_reuniao, n_participantes, final: false };
+    if (reunioes.length === 0) {
+        listaReunioes.innerHTML = '<p class="text-center">Nenhuma reunião encontrada.</p>';
+        return;
+    }
 
-    await bd.gravar(reuniao);
-    alert('Reunião adicionada com sucesso!');
-    window.location.href = 'https://sal-a-reunioes-certo-r4v4bh1xs.vercel.app/';
-});
+    reunioes.forEach((reuniao) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div class="card-header">${reuniao.pauta_reuniao}</div>
+            <div class="card-body">
+                <p><strong>Organizador:</strong> ${reuniao.organizador}</p>
+                <p><strong>Setor:</strong> ${reuniao.setor}</p>
+                <p><strong>Data:</strong> ${new Date(reuniao.data).toLocaleString()}</p>
+                <p><strong>Hora de Término:</strong> ${reuniao.hora_termino}</p>
+                <p><strong>Número de Participantes:</strong> ${reuniao.n_participantes}</p>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary btn-action" onclick="editarReuniao(${reuniao.id})">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn btn-danger btn-action" onclick="excluirReuniao(${reuniao.id})">
+                    <i class="fas fa-trash"></i> Excluir
+                </button>
+            </div>
+        `;
+        listaReunioes.appendChild(card);
+    });
+}
+
+async function excluirReuniao(id) {
+    if (confirm('Deseja realmente excluir esta reunião?')) {
+        await bd.excluir(id);
+        alert('Reunião excluída com sucesso!');
+        carregarReunioes();
+    }
+}
+
+function editarReuniao(id) {
+    window.location.href = `editar-reuniao.html?id=${id}`;
+}
+
+// Inicializa a lista de reuniões ao carregar a página
+carregarReunioes();
 </script>
-
 </body>
 </html>
