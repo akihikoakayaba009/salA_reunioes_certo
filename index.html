@@ -176,7 +176,6 @@ async function carregarReunioes() {
             <td>${reuniao.hora_termino}</td>
             <td>${reuniao.n_participantes}</td>
             <td>
-               
                 <button class="btn btn-danger btn-sm" onclick="excluirReuniao(${reuniao.id})">Excluir</button>
             </td>
         `;
@@ -195,7 +194,6 @@ async function carregarReunioes() {
                 <p><strong>Participantes:</strong> ${reuniao.n_participantes}</p>
             </div>
             <div class="card-footer">
-           
                 <button class="btn btn-danger btn-sm" onclick="excluirReuniao(${reuniao.id})">Excluir</button>
             </div>
         `;
@@ -209,10 +207,6 @@ async function excluirReuniao(id) {
         alert('Reunião excluída com sucesso!');
         carregarReunioes();
     }
-}
-
-function editarReuniao(id) {
-    window.location.href = `editar-reuniao.html?id=${id}`;
 }
 
 // Filtrar ao alterar a data
